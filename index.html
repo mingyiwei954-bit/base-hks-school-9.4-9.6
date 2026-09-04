@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f6f3eb" />
     <meta name="description" content="在场——从一次搜索，遇见此刻恰好在场的人。" />
     <title>在场 · 搜索</title>
-    <link rel="stylesheet" href="./styles.css?v=4" />
+    <link rel="stylesheet" href="./styles.css?v=5" />
   </head>
   <body>
     <main class="canvas" aria-label="在场主界面">
@@ -32,6 +32,27 @@
           <span>登录</span>
         </button>
       </header>
+
+      <section class="discovery-layer" aria-label="搜索栏目与结果">
+        <nav class="verticals-shell" aria-label="Search Verticals">
+          <div class="verticals-track" id="verticalsTrack" role="tablist" aria-label="搜索栏目">
+            <button class="is-active" type="button" role="tab" aria-selected="true" data-vertical="综合">综合</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="校园">校园</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="课程">课程</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="活动">活动</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="社团">社团</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="同学">同学</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="资源">资源</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="地点">地点</button>
+          </div>
+        </nav>
+
+        <section class="serp-stage" aria-labelledby="serpTitle">
+          <p class="serp-kicker">SERP · 自然搜索</p>
+          <h1 id="serpTitle"><span id="verticalName">综合</span>栏目</h1>
+          <p id="serpDescription">自然搜索结果将在这里呈现。当前只保留结果区域，不添加卡片或通用结果框架。</p>
+        </section>
+      </section>
 
       <section class="search-shell" id="searchShell" aria-label="搜索">
         <div class="search-widget" id="searchWidget">
@@ -145,6 +166,6 @@
       </div>
     </dialog>
 
-    <script src="./app.js?v=4"></script>
+    <script src="./app.js?v=5"></script>
   </body>
 </html>

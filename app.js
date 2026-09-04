@@ -21,6 +21,9 @@ const accountLabel = document.querySelector('#accountLabel');
 const secretLabel = document.querySelector('#secretLabel');
 const codeButton = document.querySelector('#codeButton');
 const loginNote = document.querySelector('#loginNote');
+const verticalsTrack = document.querySelector('#verticalsTrack');
+const verticalName = document.querySelector('#verticalName');
+const serpDescription = document.querySelector('#serpDescription');
 
 let isPinned = false;
 let isListening = false;
@@ -233,3 +236,37 @@ loginForm.addEventListener('submit', (event) => {
   event.preventDefault();
   loginNote.textContent = '登录能力将在下一阶段接入。';
 });
+
+function selectVertical(button) {
+  verticalsTrack.querySelectorAll('[data-vertical]').forEach((item) => {
+    const active = item === button;
+    item.classList.toggle('is-active', active);
+    item.setAttribute('aria-selected', String(active));
+  });
+
+  const name = button.dataset.vertical;
+  verticalName.textContent = name;
+  serpDescription.textContent = `${name}自然搜索结果将在这里呈现。当前只保留结果区域，不添加卡片或通用结果框架。`;
+  const targetLeft = button.offsetLeft - (verticalsTrack.clientWidth - button.offsetWidth) / 2;
+  verticalsTrack.scrollTo({ left: targetLeft, behavior: 'smooth' });
+}
+
+verticalsTrack.querySelectorAll('[data-vertical]').forEach((button) => {
+  button.addEventListener('click', () => selectVertical(button));
+  button.addEventListener('keydown', (event) => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    const tabs = [...verticalsTrack.querySelectorAll('[data-vertical]')];
+    const current = tabs.indexOf(button);
+    const direction = event.key === 'ArrowRight' ? 1 : -1;
+    const next = tabs[(current + direction + tabs.length) % tabs.length];
+    selectVertical(next);
+    next.focus();
+  });
+});
+
+verticalsTrack.addEventListener('wheel', (event) => {
+  if (Math.abs(event.deltaY) <= Math.abs(event.deltaX)) return;
+  event.preventDefault();
+  verticalsTrack.scrollBy({ left: event.deltaY, behavior: 'smooth' });
+}, { passive: false });
