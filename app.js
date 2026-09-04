@@ -11,6 +11,16 @@ const photoAction = document.querySelector('#photoAction');
 const photoMenu = document.querySelector('#photoMenu');
 const toast = document.querySelector('#toast');
 const toastMessage = document.querySelector('#toastMessage');
+const loginTrigger = document.querySelector('#loginTrigger');
+const loginDialog = document.querySelector('#loginDialog');
+const loginClose = document.querySelector('#loginClose');
+const loginForm = document.querySelector('#loginForm');
+const loginAccount = document.querySelector('#loginAccount');
+const loginSecret = document.querySelector('#loginSecret');
+const accountLabel = document.querySelector('#accountLabel');
+const secretLabel = document.querySelector('#secretLabel');
+const codeButton = document.querySelector('#codeButton');
+const loginNote = document.querySelector('#loginNote');
 
 let isPinned = false;
 let isListening = false;
@@ -174,4 +184,52 @@ document.addEventListener('keydown', (event) => {
   isPinned = false;
   document.activeElement?.blur();
   setExpanded(false);
+});
+
+function setLoginMode(mode) {
+  const isPhone = mode === 'phone';
+  document.querySelectorAll('[data-login-mode]').forEach((tab) => {
+    const active = tab.dataset.loginMode === mode;
+    tab.classList.toggle('is-active', active);
+    tab.setAttribute('aria-selected', String(active));
+  });
+
+  accountLabel.textContent = isPhone ? '手机号' : '邮箱';
+  loginAccount.type = isPhone ? 'tel' : 'email';
+  loginAccount.inputMode = isPhone ? 'tel' : 'email';
+  loginAccount.autocomplete = isPhone ? 'tel' : 'email';
+  loginAccount.placeholder = isPhone ? '请输入手机号' : 'name@example.com';
+  secretLabel.textContent = isPhone ? '验证码' : '密码';
+  loginSecret.type = isPhone ? 'text' : 'password';
+  loginSecret.inputMode = isPhone ? 'numeric' : 'text';
+  loginSecret.autocomplete = isPhone ? 'one-time-code' : 'current-password';
+  loginSecret.placeholder = isPhone ? '请输入验证码' : '请输入密码';
+  codeButton.hidden = !isPhone;
+  loginAccount.value = '';
+  loginSecret.value = '';
+  loginNote.textContent = '本阶段为界面占位，暂不连接真实账号。';
+}
+
+loginTrigger.addEventListener('click', () => {
+  setLoginMode('phone');
+  loginDialog.showModal();
+  window.setTimeout(() => loginAccount.focus(), 80);
+});
+
+loginClose.addEventListener('click', () => loginDialog.close());
+loginDialog.addEventListener('click', (event) => {
+  if (event.target === loginDialog) loginDialog.close();
+});
+
+document.querySelectorAll('[data-login-mode]').forEach((tab) => {
+  tab.addEventListener('click', () => setLoginMode(tab.dataset.loginMode));
+});
+
+codeButton.addEventListener('click', () => {
+  loginNote.textContent = '验证码能力将在账号系统接入后开放。';
+});
+
+loginForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  loginNote.textContent = '登录能力将在下一阶段接入。';
 });

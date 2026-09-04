@@ -6,16 +6,31 @@
     <meta name="theme-color" content="#f6f3eb" />
     <meta name="description" content="在场——从一次搜索，遇见此刻恰好在场的人。" />
     <title>在场 · 搜索</title>
-    <link rel="stylesheet" href="./styles.css?v=2" />
+    <link rel="stylesheet" href="./styles.css?v=3" />
   </head>
   <body>
     <main class="canvas" aria-label="在场主界面">
       <div class="ambient ambient-one" aria-hidden="true"></div>
       <div class="ambient ambient-two" aria-hidden="true"></div>
 
-      <header class="top-rail" aria-label="顶部导航预留区">
-        <div class="brand-slot" aria-hidden="true"></div>
-        <div class="user-slot" aria-hidden="true"></div>
+      <header class="top-rail" aria-label="顶部导航">
+        <a class="university-mark" href="#" aria-label="中国人民大学首页占位">
+          <span class="emblem-crop" aria-hidden="true">
+            <img src="https://www.ruc.edu.cn/template/1/out/imgs/VI/1.png" alt="" />
+          </span>
+          <span class="university-name">
+            <strong>中国人民大学</strong>
+            <small>RENMIN UNIVERSITY OF CHINA</small>
+          </span>
+        </a>
+
+        <button class="login-trigger" id="loginTrigger" type="button" aria-haspopup="dialog">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="12" cy="8" r="3.4"></circle>
+            <path d="M5.8 20a6.2 6.2 0 0 1 12.4 0"></path>
+          </svg>
+          <span>登录</span>
+        </button>
       </header>
 
       <section class="search-shell" id="searchShell" aria-label="搜索">
@@ -93,6 +108,43 @@
       </div>
     </main>
 
-    <script src="./app.js?v=2"></script>
+    <dialog class="login-dialog" id="loginDialog" aria-labelledby="loginTitle">
+      <div class="login-card">
+        <button class="dialog-close" id="loginClose" type="button" aria-label="关闭登录窗口">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6.5 6.5 11 11m0-11-11 11"></path></svg>
+        </button>
+
+        <div class="login-heading">
+          <span class="login-symbol" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.4"></circle><path d="M5.8 20a6.2 6.2 0 0 1 12.4 0"></path></svg>
+          </span>
+          <div>
+            <h1 id="loginTitle">用户登录</h1>
+            <p>登录后继续使用你的个人空间</p>
+          </div>
+        </div>
+
+        <div class="login-tabs" role="tablist" aria-label="登录方式">
+          <button class="is-active" type="button" role="tab" aria-selected="true" data-login-mode="phone">手机号登录</button>
+          <button type="button" role="tab" aria-selected="false" data-login-mode="email">邮箱登录</button>
+        </div>
+
+        <form class="login-form" id="loginForm">
+          <label for="loginAccount" id="accountLabel">手机号</label>
+          <input id="loginAccount" name="account" type="tel" inputmode="tel" autocomplete="tel" placeholder="请输入手机号" />
+
+          <label for="loginSecret" id="secretLabel">验证码</label>
+          <div class="secret-row">
+            <input id="loginSecret" name="secret" type="text" inputmode="numeric" autocomplete="one-time-code" placeholder="请输入验证码" />
+            <button class="code-button" id="codeButton" type="button">获取验证码</button>
+          </div>
+
+          <button class="login-submit" type="submit">登录</button>
+          <p class="login-note" id="loginNote" role="status" aria-live="polite">本阶段为界面占位，暂不连接真实账号。</p>
+        </form>
+      </div>
+    </dialog>
+
+    <script src="./app.js?v=3"></script>
   </body>
 </html>
