@@ -83,12 +83,12 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
   position: relative;
   z-index: 1;
   min-height: 100vh;
-  padding: 116px 0 240px;
+  padding: 102px 0 240px;
 }
 
 .verticals-shell {
   position: relative;
-  width: min(760px, calc(100vw - 80px));
+  width: min(1120px, calc(100vw - 64px));
   margin: 0 auto;
 }
 
@@ -121,8 +121,8 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 .verticals-track::-webkit-scrollbar { display: none; }
 .verticals-track button {
   position: relative;
-  flex: 0 0 112px;
-  height: 54px;
+  flex: 0 0 140px;
+  height: 46px;
   border: 0;
   color: #7a8680;
   background: transparent;
