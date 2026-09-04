@@ -157,11 +157,11 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 .login-submit { height: 46px; margin-top: 23px; border: 0; border-radius: 14px; color: white; background: var(--green); box-shadow: 0 8px 18px rgba(52, 115, 91, 0.18); font-size: 13px; font-weight: 650; letter-spacing: 0.12em; cursor: pointer; }
 .login-submit:hover { background: #2f684f; }
 .login-note { margin: 13px 0 0; color: #9a918c; font-size: 10px; text-align: center; }
-}
 
 .search-shell {
   position: fixed;
-  top: 116px;
+  top: auto;
+  bottom: 22vh;
   left: 50%;
   z-index: 10;
   width: 48px;
@@ -320,7 +320,8 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 
 .photo-menu {
   position: absolute;
-  top: 66px;
+  top: auto;
+  bottom: 66px;
   right: 0;
   width: 232px;
   padding: 7px;
@@ -330,8 +331,8 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
   box-shadow: var(--shadow);
   opacity: 0;
   visibility: hidden;
-  transform: translateY(-7px) scale(0.98);
-  transform-origin: top right;
+  transform: translateY(7px) scale(0.98);
+  transform-origin: bottom right;
   transition: opacity 150ms ease, transform 210ms var(--ease), visibility 0s linear 210ms;
   backdrop-filter: blur(18px);
 }
@@ -360,7 +361,8 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 
 .toast {
   position: fixed;
-  top: 182px;
+  top: auto;
+  bottom: calc(22vh - 48px);
   left: 50%;
   z-index: 9;
   display: flex;
@@ -415,12 +417,14 @@ input:focus-visible {
   .login-trigger { min-width: 66px; padding: 0 12px; }
   .login-trigger svg { display: none; }
   .login-card { padding: 28px 22px 24px; }
-  .search-shell { top: 92px; }
+  .search-shell { top: 92px; bottom: auto; }
   .search-shell.is-expanded,
   .search-shell:focus-within { width: calc(100vw - 32px); }
   .typing-mode,
   .voice-mode { width: calc(100vw - 34px); }
-  .toast { top: 158px; }
+  .photo-menu { top: 66px; bottom: auto; transform: translateY(-7px) scale(0.98); transform-origin: top right; }
+  .photo-menu.is-open { transform: translateY(0) scale(1); }
+  .toast { top: 158px; bottom: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {
