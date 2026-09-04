@@ -64,13 +64,32 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
   background: rgba(233, 150, 118, 0.07);
 }
 
+.top-rail {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 88px;
+  padding: 0 42px;
+  border-bottom: 1px solid rgba(24, 49, 40, 0.075);
+}
+
+.brand-slot,
+.user-slot {
+  width: 160px;
+  height: 40px;
+}
+
 .search-shell {
   position: fixed;
-  top: 32px;
-  left: 32px;
+  top: 116px;
+  left: 50%;
   z-index: 10;
   width: 48px;
   height: 48px;
+  transform: translateX(-50%);
   transition: width 240ms var(--ease), height 240ms var(--ease);
 }
 
@@ -264,8 +283,8 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
 
 .toast {
   position: fixed;
-  top: 98px;
-  left: 32px;
+  top: 182px;
+  left: 50%;
   z-index: 9;
   display: flex;
   align-items: center;
@@ -277,12 +296,12 @@ button { color: inherit; -webkit-tap-highlight-color: transparent; }
   background: rgba(255, 254, 250, 0.88);
   box-shadow: 0 8px 22px rgba(29, 46, 38, 0.07);
   opacity: 0;
-  transform: translateY(-6px);
+  transform: translate(-50%, -6px);
   pointer-events: none;
   transition: opacity 180ms ease, transform 220ms var(--ease);
   backdrop-filter: blur(14px);
 }
-.toast.is-visible { opacity: 1; transform: translateY(0); }
+.toast.is-visible { opacity: 1; transform: translate(-50%, 0); }
 .toast span { display: grid; place-items: center; width: 17px; height: 17px; border-radius: 50%; color: var(--green); background: var(--green-soft); font-size: 17px; line-height: 1; }
 .toast p { margin: 0; color: #65736c; font-size: 10px; letter-spacing: 0.02em; }
 
@@ -311,12 +330,15 @@ input:focus-visible {
 }
 
 @media (max-width: 560px) {
-  .search-shell { top: 20px; left: 16px; }
+  .top-rail { height: 72px; padding: 0 16px; }
+  .brand-slot,
+  .user-slot { width: 96px; }
+  .search-shell { top: 92px; }
   .search-shell.is-expanded,
   .search-shell:focus-within { width: calc(100vw - 32px); }
   .typing-mode,
   .voice-mode { width: calc(100vw - 34px); }
-  .toast { top: 86px; left: 16px; }
+  .toast { top: 158px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
