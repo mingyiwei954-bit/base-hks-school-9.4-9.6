@@ -1,78 +1,177 @@
-const filters = document.querySelectorAll('.filter');
-const cards = document.querySelectorAll('.connection-card');
-const dialog = document.querySelector('#composeDialog');
-const toast = document.querySelector('#toast');
-const searchPanel = document.querySelector('#searchPanel');
+const shell = document.querySelector('#searchShell');
+const searchAction = document.querySelector('#searchAction');
 const searchInput = document.querySelector('#searchInput');
+const typingMode = document.querySelector('#typingMode');
+const voiceAction = document.querySelector('#voiceAction');
+const voiceBack = document.querySelector('#voiceBack');
+const voiceMode = document.querySelector('#voiceMode');
+const holdToTalk = document.querySelector('#holdToTalk');
+const voiceCopy = document.querySelector('#voiceCopy');
+const photoAction = document.querySelector('#photoAction');
+const photoMenu = document.querySelector('#photoMenu');
+const toast = document.querySelector('#toast');
+const toastMessage = document.querySelector('#toastMessage');
 
-filters.forEach((filter) => {
-  filter.addEventListener('click', () => {
-    filters.forEach((item) => item.classList.remove('active'));
-    filter.classList.add('active');
-    const category = filter.dataset.filter;
-    cards.forEach((card) => card.classList.toggle('hidden', category !== 'all' && card.dataset.category !== category));
-  });
+let isPinned = false;
+let isListening = false;
+let toastTimer;
+let collapseTimer;
+
+function setExpanded(expanded, focusInput = false) {
+  shell.classList.toggle('is-expanded', expanded);
+  searchAction.setAttribute('aria-expanded', String(expanded));
+  searchAction.setAttribute('aria-label', expanded ? '搜索' : '展开搜索');
+
+  if (!expanded) {
+    closePhotoMenu();
+    exitVoiceMode();
+  } else if (focusInput) {
+    window.setTimeout(() => searchInput.focus(), 80);
+  }
+}
+
+function pinAndExpand(focusInput = false) {
+  window.clearTimeout(collapseTimer);
+  isPinned = true;
+  setExpanded(true, focusInput);
+}
+
+function submitSearch() {
+  pinAndExpand();
+  showToast('搜索能力将在下一层接入');
+}
+
+function enterVoiceMode() {
+  closePhotoMenu();
+  pinAndExpand();
+  shell.classList.add('is-voice');
+  typingMode.inert = true;
+  voiceMode.inert = false;
+  voiceMode.setAttribute('aria-hidden', 'false');
+  window.setTimeout(() => holdToTalk.focus(), 120);
+}
+
+function exitVoiceMode() {
+  stopListening();
+  shell.classList.remove('is-voice');
+  typingMode.inert = false;
+  voiceMode.inert = true;
+  voiceMode.setAttribute('aria-hidden', 'true');
+}
+
+function startListening(event) {
+  if (event?.button !== undefined && event.button !== 0) return;
+  isListening = true;
+  holdToTalk.classList.add('is-listening');
+  holdToTalk.setAttribute('aria-label', '正在聆听，松开结束');
+  voiceCopy.textContent = '正在聆听…';
+  if (event?.pointerId !== undefined) holdToTalk.setPointerCapture?.(event.pointerId);
+}
+
+function stopListening() {
+  if (!isListening) return;
+  isListening = false;
+  holdToTalk.classList.remove('is-listening');
+  holdToTalk.setAttribute('aria-label', '按住说话');
+  voiceCopy.textContent = '按住说话';
+}
+
+function togglePhotoMenu() {
+  const willOpen = !photoMenu.classList.contains('is-open');
+  if (willOpen) exitVoiceMode();
+  photoMenu.classList.toggle('is-open', willOpen);
+  photoMenu.setAttribute('aria-hidden', String(!willOpen));
+  photoAction.setAttribute('aria-expanded', String(willOpen));
+  pinAndExpand();
+  if (willOpen) window.setTimeout(() => photoMenu.querySelector('[role="menuitem"]').focus(), 80);
+}
+
+function closePhotoMenu() {
+  photoMenu.classList.remove('is-open');
+  photoMenu.setAttribute('aria-hidden', 'true');
+  photoAction.setAttribute('aria-expanded', 'false');
+}
+
+function showToast(message) {
+  toastMessage.textContent = message;
+  toast.classList.add('is-visible');
+  window.clearTimeout(toastTimer);
+  toastTimer = window.setTimeout(() => toast.classList.remove('is-visible'), 2300);
+}
+
+shell.addEventListener('pointerenter', () => {
+  window.clearTimeout(collapseTimer);
+  setExpanded(true);
 });
 
-document.querySelectorAll('[data-open-compose]').forEach((button) => {
-  button.addEventListener('click', () => dialog.showModal());
+shell.addEventListener('pointerleave', () => {
+  collapseTimer = window.setTimeout(() => {
+    const hasFocus = shell.contains(document.activeElement);
+    if (!isPinned && !hasFocus && !photoMenu.classList.contains('is-open')) setExpanded(false);
+  }, 110);
 });
 
-document.querySelector('#publishButton').addEventListener('click', (event) => {
-  const need = document.querySelector('#needInput');
-  if (!need.value.trim()) {
-    event.preventDefault();
-    need.focus();
+shell.addEventListener('focusin', () => pinAndExpand());
+
+searchAction.addEventListener('click', () => {
+  if (!shell.classList.contains('is-expanded')) {
+    pinAndExpand(true);
     return;
   }
-  showToast('连接已发出', '同频的人很快会看见你');
+  submitSearch();
 });
 
-document.querySelectorAll('.connect-button, .round-button').forEach((button) => {
+searchInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    submitSearch();
+  } else if (event.key === 'Escape') {
+    event.preventDefault();
+  }
+});
+
+voiceAction.addEventListener('click', enterVoiceMode);
+voiceBack.addEventListener('click', () => {
+  exitVoiceMode();
+  searchInput.focus();
+});
+
+holdToTalk.addEventListener('pointerdown', startListening);
+holdToTalk.addEventListener('pointerup', stopListening);
+holdToTalk.addEventListener('pointercancel', stopListening);
+holdToTalk.addEventListener('lostpointercapture', stopListening);
+holdToTalk.addEventListener('keydown', (event) => {
+  if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) {
+    event.preventDefault();
+    startListening();
+  }
+});
+holdToTalk.addEventListener('keyup', (event) => {
+  if (event.key === ' ' || event.key === 'Enter') {
+    event.preventDefault();
+    stopListening();
+  }
+});
+
+photoAction.addEventListener('click', togglePhotoMenu);
+photoMenu.querySelectorAll('[data-photo-option]').forEach((button) => {
   button.addEventListener('click', () => {
-    button.classList.add('connected');
-    showToast('回应已送达', '一次新的连接正在发生');
+    const label = button.dataset.photoOption;
+    closePhotoMenu();
+    showToast(`${label}能力将在下一层接入`);
+    photoAction.focus();
   });
 });
 
-document.querySelector('#randomMatch').addEventListener('click', () => {
-  const choices = [...cards];
-  const chosen = choices[Math.floor(Math.random() * choices.length)];
-  chosen.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  chosen.animate([{ outline: '2px solid transparent' }, { outline: '2px solid #ff8b66' }, { outline: '2px solid transparent' }], { duration: 1400 });
-});
-
-document.querySelector('#searchButton').addEventListener('click', openSearch);
-document.querySelector('#closeSearch').addEventListener('click', closeSearch);
-searchInput.addEventListener('input', () => {
-  const keyword = searchInput.value.trim().toLowerCase();
-  cards.forEach((card) => card.classList.toggle('hidden', keyword && !card.textContent.toLowerCase().includes(keyword)));
+document.addEventListener('pointerdown', (event) => {
+  if (shell.contains(event.target)) return;
+  isPinned = false;
+  setExpanded(false);
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') closeSearch();
-  if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
-    event.preventDefault();
-    openSearch();
-  }
+  if (event.key !== 'Escape') return;
+  isPinned = false;
+  document.activeElement?.blur();
+  setExpanded(false);
 });
-
-function openSearch() {
-  searchPanel.classList.add('open');
-  searchPanel.setAttribute('aria-hidden', 'false');
-  setTimeout(() => searchInput.focus(), 250);
-}
-
-function closeSearch() {
-  searchPanel.classList.remove('open');
-  searchPanel.setAttribute('aria-hidden', 'true');
-}
-
-let toastTimer;
-function showToast(title, message) {
-  toast.querySelector('b').textContent = title;
-  toast.querySelector('small').textContent = message;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => toast.classList.remove('show'), 2600);
-}

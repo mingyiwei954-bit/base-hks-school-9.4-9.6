@@ -3,202 +3,91 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f5f2ea" />
-    <meta name="description" content="在场——让校园里的每一次需要，都遇见一个真实的人。" />
-    <title>在场 · 校园连接实验室</title>
+    <meta name="theme-color" content="#f6f3eb" />
+    <meta name="description" content="在场——从一次搜索，遇见此刻恰好在场的人。" />
+    <title>在场 · 搜索</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
-    <div class="noise" aria-hidden="true"></div>
-    <header class="topbar">
-      <a class="brand" href="#" aria-label="在场首页">
-        <span class="brand-mark"><i></i><i></i><i></i></span>
-        <span>在场</span>
-      </a>
-      <nav class="desktop-nav" aria-label="主导航">
-        <a class="active" href="#square">连接广场</a>
-        <a href="#channels">校园频道</a>
-        <a href="#stories">连接故事</a>
-      </nav>
-      <div class="top-actions">
-        <button class="icon-button" aria-label="搜索" id="searchButton">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
-        </button>
-        <button class="avatar-button" aria-label="个人中心">文</button>
-        <button class="primary small" data-open-compose>发起连接 <span>＋</span></button>
+    <main class="canvas" aria-label="在场主界面">
+      <div class="ambient ambient-one" aria-hidden="true"></div>
+      <div class="ambient ambient-two" aria-hidden="true"></div>
+
+      <section class="search-shell" id="searchShell" aria-label="搜索">
+        <div class="search-widget" id="searchWidget">
+          <div class="typing-mode" id="typingMode">
+            <button class="search-action" id="searchAction" type="button" aria-label="展开搜索" aria-expanded="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="10.8" cy="10.8" r="6.2"></circle>
+                <path d="m15.5 15.5 4.2 4.2"></path>
+              </svg>
+            </button>
+
+            <label class="visually-hidden" for="searchInput">搜索一个需要、地点或兴趣</label>
+            <input
+              id="searchInput"
+              type="search"
+              placeholder="搜索一个需要、地点或兴趣"
+              autocomplete="off"
+              enterkeyhint="search"
+            />
+
+            <button class="utility-action" id="voiceAction" type="button" aria-label="切换到按住说话">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="8.3" y="3.2" width="7.4" height="12" rx="3.7"></rect>
+                <path d="M5.8 11.8a6.2 6.2 0 0 0 12.4 0M12 18v3M9.2 21h5.6"></path>
+              </svg>
+            </button>
+
+            <button
+              class="utility-action"
+              id="photoAction"
+              type="button"
+              aria-label="打开图片搜索选项"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="photoMenu"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M7.5 6.5 9 4.2h6l1.5 2.3h2.2a2.3 2.3 0 0 1 2.3 2.3v8.9a2.3 2.3 0 0 1-2.3 2.3H5.3A2.3 2.3 0 0 1 3 17.7V8.8a2.3 2.3 0 0 1 2.3-2.3h2.2Z"></path>
+                <circle cx="12" cy="13" r="3.5"></circle>
+              </svg>
+            </button>
+          </div>
+
+          <div class="voice-mode" id="voiceMode" aria-hidden="true" inert>
+            <button class="voice-back" id="voiceBack" type="button" aria-label="返回文字搜索">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m14.5 6-6 6 6 6"></path></svg>
+            </button>
+            <button class="hold-to-talk" id="holdToTalk" type="button" aria-label="按住说话">
+              <span class="voice-copy" id="voiceCopy">按住说话</span>
+              <span class="wave" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="photo-menu" id="photoMenu" role="menu" aria-label="图片搜索选项" aria-hidden="true">
+          <button type="button" role="menuitem" data-photo-option="拍照">
+            <span class="menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M7.5 7 9 4.8h6L16.5 7h2A2.5 2.5 0 0 1 21 9.5v8A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5v-8A2.5 2.5 0 0 1 5.5 7h2Z"></path><circle cx="12" cy="13.2" r="3.4"></circle></svg>
+            </span>
+            <span><b>拍照</b><small>使用相机捕捉此刻</small></span>
+          </button>
+          <button type="button" role="menuitem" data-photo-option="从相册选择">
+            <span class="menu-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><rect x="3.5" y="4" width="17" height="16" rx="2.5"></rect><circle cx="8.5" cy="9" r="1.5"></circle><path d="m5.8 17 4.1-4.1 2.7 2.5 2.3-2.1 3.4 3.7"></path></svg>
+            </span>
+            <span><b>从相册选择</b><small>查找已有的照片</small></span>
+          </button>
+        </div>
+      </section>
+
+      <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true">
+        <span aria-hidden="true">·</span>
+        <p id="toastMessage">搜索能力将在下一层接入</p>
       </div>
-    </header>
-
-    <main>
-      <section class="hero" id="square">
-        <div class="hero-copy">
-          <div class="eyebrow"><span></span> CAMPUS CONNECTION LAB</div>
-          <h1>别只路过，<br /><em>和校园发生联系。</em></h1>
-          <p>把一个具体的需要放出来，让此刻恰好在场的人看见。<br />从一次帮忙，开始一段真实的关系。</p>
-          <div class="hero-actions">
-            <button class="primary" data-open-compose>我想发起连接 <span>↗</span></button>
-            <button class="text-button" id="randomMatch">看看谁与我同频 <span>→</span></button>
-          </div>
-          <div class="live-note">
-            <div class="stacked-avatars"><span>周</span><span>陈</span><span>林</span><span>＋</span></div>
-            <p><strong>128 位同学</strong> 今天在校园里建立了连接</p>
-          </div>
-        </div>
-
-        <div class="connection-map" aria-label="校园连接网络示意图">
-          <div class="map-label">此刻 · 青春广场附近</div>
-          <div class="orbit orbit-one"></div>
-          <div class="orbit orbit-two"></div>
-          <div class="node node-center">
-            <span class="portrait portrait-main">你</span>
-            <div><b>今晚有空</b><small>想找人一起跑步</small></div>
-          </div>
-          <div class="node node-a">
-            <span class="portrait peach">淼</span>
-            <div><b>0.3 km</b><small>也想跑两圈</small></div>
-          </div>
-          <div class="node node-b">
-            <span class="portrait mint">北</span>
-            <div><b>同院系</b><small>认识新搭子</small></div>
-          </div>
-          <div class="node node-c">
-            <span class="portrait lilac">遥</span>
-            <div><b>19:30</b><small>操场见？</small></div>
-          </div>
-          <svg class="connection-lines" viewBox="0 0 600 520" aria-hidden="true">
-            <path d="M305 250 C250 210 190 200 145 150"></path>
-            <path d="M310 265 C390 220 420 180 480 135"></path>
-            <path d="M320 285 C410 320 440 365 480 415"></path>
-          </svg>
-          <div class="map-pulse"></div>
-          <div class="map-caption"><span></span> 正在发生的连接</div>
-        </div>
-      </section>
-
-      <section class="pulse-section" id="channels">
-        <div class="section-heading">
-          <div>
-            <span class="section-index">01 / CAMPUS PULSE</span>
-            <h2>此刻，校园正在需要什么？</h2>
-          </div>
-          <p>不是冷冰冰的信息列表。<br />每一条背后，都是一个正在等待回应的人。</p>
-        </div>
-
-        <div class="filter-row" role="tablist" aria-label="连接分类">
-          <button class="filter active" data-filter="all">全部连接 <sup>24</sup></button>
-          <button class="filter" data-filter="study">学习搭子 <sup>08</sup></button>
-          <button class="filter" data-filter="life">生活互助 <sup>06</sup></button>
-          <button class="filter" data-filter="interest">兴趣同频 <sup>07</sup></button>
-          <button class="filter" data-filter="urgent">紧急需要 <sup>03</sup></button>
-        </div>
-
-        <div class="connection-grid">
-          <article class="connection-card featured" data-category="study">
-            <div class="card-meta"><span class="tag study">学习搭子</span><span>刚刚</span></div>
-            <h3>四级词汇总是背了又忘，<br />想找 3 个人一起坚持 21 天。</h3>
-            <p>每天晚饭后 20 分钟，互相抽查、共享易错词。不是卷，是想有人一起走得远一点。</p>
-            <div class="word-strip"><span>resilient</span><span>ambiguous</span><span>· 今日词卡 12</span></div>
-            <div class="card-footer">
-              <div class="person"><span class="portrait peach">予</span><div><b>林予安</b><small>英语 2302 · 图书馆</small></div></div>
-              <button class="connect-button">加入她们 <span>2 / 4</span></button>
-            </div>
-          </article>
-
-          <article class="connection-card" data-category="life">
-            <div class="card-meta"><span class="tag life">生活互助</span><span>8 分钟前</span></div>
-            <h3>有人的自行车也总掉链子吗？我会修，顺便教你。</h3>
-            <p>下午五点在北门修车棚，带了工具。不收费，帮我拍几张社团招新照就好。</p>
-            <div class="card-footer">
-              <div class="person"><span class="portrait mint">哲</span><div><b>唐哲</b><small>机械 2201 · 北门</small></div></div>
-              <button class="connect-button">回应他 <span>1 人</span></button>
-            </div>
-          </article>
-
-          <article class="connection-card coral" data-category="urgent">
-            <div class="card-meta"><span class="tag urgent">正在发生</span><span>还差 1 人</span></div>
-            <h3>社团路演临时缺一个摄影，救救！</h3>
-            <p>18:40 艺术楼门口集合，大概 40 分钟。结束请你喝奶茶，照片可署名。</p>
-            <div class="card-footer">
-              <div class="person"><span class="portrait lilac">乔</span><div><b>乔木</b><small>新传 2402 · 艺术楼</small></div></div>
-              <button class="connect-button light">我能来 <span>↗</span></button>
-            </div>
-          </article>
-
-          <article class="connection-card" data-category="interest">
-            <div class="card-meta"><span class="tag interest">兴趣同频</span><span>今天 14:20</span></div>
-            <h3>收集校园里“没人注意的蓝色”，一起散步拍照。</h3>
-            <p>周六下午，从旧教学楼出发。手机就行，最后把大家的照片做成一张校园色卡。</p>
-            <div class="mini-gallery"><i></i><i></i><i></i><i></i></div>
-            <div class="card-footer">
-              <div class="person"><span class="portrait blue">屿</span><div><b>周屿</b><small>建筑 2301 · 旧教</small></div></div>
-              <button class="connect-button">一起走走 <span>5 人</span></button>
-            </div>
-          </article>
-
-          <article class="connection-card compact" data-category="study">
-            <div class="card-meta"><span class="tag study">课程互助</span><span>今天</span></div>
-            <h3>概率论第二章没听懂，求交换一小时讲题。</h3>
-            <p>我可以帮你改简历，或者请一杯咖啡。</p>
-            <div class="card-footer">
-              <div class="person"><span class="portrait yellow">洛</span><div><b>沈洛</b><small>经管 2403</small></div></div>
-              <button class="round-button" aria-label="回应沈洛">↗</button>
-            </div>
-          </article>
-
-          <article class="connection-card compact" data-category="life">
-            <div class="card-meta"><span class="tag life">失物回家</span><span>12 分钟前</span></div>
-            <h3>在三食堂捡到一只蓝色耳机，等它的主人。</h3>
-            <p>说出耳机壳上的贴纸就可以拿走。</p>
-            <div class="card-footer">
-              <div class="person"><span class="portrait mint">嘉</span><div><b>许嘉</b><small>三食堂</small></div></div>
-              <button class="round-button" aria-label="联系许嘉">↗</button>
-            </div>
-          </article>
-        </div>
-      </section>
-
-      <section class="stories" id="stories">
-        <span class="section-index">02 / CONNECTION STORIES</span>
-        <div class="story-layout">
-          <div class="quote-mark">“</div>
-          <blockquote>我只是借了一把伞，<br />后来多了一个每周一起吃饭的朋友。</blockquote>
-          <div class="story-person"><span class="portrait blue">然</span><div><b>顾然 & 陈一</b><small>连接发生于 2026.08.27 · 南门</small></div></div>
-          <div class="story-stats"><strong>2,416</strong><span>次真实连接<br />已在校园发生</span></div>
-        </div>
-      </section>
-
-      <section class="cta-section">
-        <div>
-          <span class="eyebrow"><span></span> YOUR TURN</span>
-          <h2>下一段校园关系，<br />也许就从你的一句话开始。</h2>
-        </div>
-        <button class="primary dark" data-open-compose>说出你的需要 <span>↗</span></button>
-      </section>
     </main>
 
-    <footer>
-      <a class="brand" href="#"><span class="brand-mark"><i></i><i></i><i></i></span><span>在场</span></a>
-      <p>让每一次需要，都遇见一个真实的人。</p>
-      <span>HACKATHON · 2026</span>
-    </footer>
-
-    <dialog class="compose-dialog" id="composeDialog">
-      <form method="dialog">
-        <div class="dialog-head"><div><small>CREATE A CONNECTION</small><h2>你想遇见怎样的人？</h2></div><button value="cancel" aria-label="关闭">×</button></div>
-        <label>一句话说出你的需要<textarea id="needInput" placeholder="例如：想找两个人，每晚一起背 20 分钟单词……" required></textarea></label>
-        <div class="form-row">
-          <label>连接类型<select><option>学习搭子</option><option>生活互助</option><option>兴趣同频</option><option>紧急需要</option></select></label>
-          <label>期待人数<select><option>1 人</option><option>2—3 人</option><option>4—6 人</option><option>不限</option></select></label>
-        </div>
-        <label>在哪里见面？<input placeholder="图书馆、操场，或者线上" /></label>
-        <div class="dialog-actions"><span>发布后，你可以随时结束连接</span><button class="primary" value="default" id="publishButton">让同频的人看见 <b>↗</b></button></div>
-      </form>
-    </dialog>
-
-    <div class="search-panel" id="searchPanel" aria-hidden="true">
-      <div><span>⌕</span><input id="searchInput" placeholder="搜索一个需要、地点或兴趣……" /><button id="closeSearch">ESC</button></div>
-    </div>
-    <div class="toast" id="toast"><span>✓</span><p><b>回应已送达</b><small>一次新的连接正在发生</small></p></div>
     <script src="./app.js"></script>
   </body>
 </html>
