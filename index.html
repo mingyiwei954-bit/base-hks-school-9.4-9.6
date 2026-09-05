@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#f6f3eb" />
     <meta name="description" content="在场——从一次搜索，遇见此刻恰好在场的人。" />
     <title>在场 · 搜索</title>
-    <link rel="stylesheet" href="./styles.css?v=92" />
+    <link rel="stylesheet" href="./styles.css?v=95" />
   </head>
   <body>
     <main class="canvas" aria-label="在场主界面">
@@ -49,6 +49,10 @@
             <button type="button" role="tab" aria-selected="false" data-vertical="学习库">学习库</button>
             <button type="button" role="tab" aria-selected="false" data-vertical="工具箱">工具箱</button>
           </div>
+        </nav>
+
+        <nav class="mobile-subnav" id="mobileSubnav" aria-label="当前栏目" hidden>
+          <div class="mobile-subnav-track" id="mobileSubnavTrack" role="tablist"></div>
         </nav>
 
         <section class="serp-stage" aria-label="搜索结果">
@@ -305,6 +309,6 @@
 
     <dialog class="post-detail-dialog" id="postDetailDialog" aria-label="内容详情"></dialog>
 
-    <script src="./app.js?v=87"></script>
+    <script src="./app.js?v=90"></script>
   </body>
 </html>

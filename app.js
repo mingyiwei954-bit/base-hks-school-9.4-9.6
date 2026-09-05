@@ -53,6 +53,8 @@ function returnToHome(event) {
 universityMark.addEventListener('click', returnToHome);
 hangingEmblem.addEventListener('click', returnToHome);
 const verticalsTrack = document.querySelector('#verticalsTrack');
+const mobileSubnav = document.querySelector('#mobileSubnav');
+const mobileSubnavTrack = document.querySelector('#mobileSubnavTrack');
 const supportDrawer = document.querySelector('#supportDrawer');
 const resultItems = document.querySelector('#resultItems');
 const pomodoroDialog = document.querySelector('#pomodoroDialog');
@@ -413,6 +415,14 @@ document.addEventListener('keydown', (event) => {
     closeResourceDetail();
     return;
   }
+  if (document.querySelector('.mutual-detail-layer')) {
+    closeMutualDetail();
+    return;
+  }
+  if (document.querySelector('.learning-detail-layer,.learning-editor-layer')) {
+    closeLearningLayer();
+    return;
+  }
   if (document.querySelector('.points-layer')) {
     closePointsPanel();
     return;
@@ -452,6 +462,12 @@ function setLoginMode(mode) {
   loginAccount.value = '';
   loginSecret.value = '';
   loginNote.textContent = '本阶段为界面占位，暂不连接真实账号。';
+}
+
+function openLoginDialog() {
+  setLoginMode('phone');
+  if (!loginDialog.open) loginDialog.showModal();
+  window.setTimeout(() => loginAccount.focus(), 80);
 }
 
 loginTrigger.addEventListener('click', () => {
@@ -503,30 +519,36 @@ function openPointsPanel() {
   layer.querySelector('.points-close').focus();
 }
 
-pointsTrigger.addEventListener('click', () => {
+function closeAccountMenu() {
   accountMenu.classList.remove('is-open');
   accountMenu.setAttribute('aria-hidden', 'true');
   loginTrigger.setAttribute('aria-expanded', 'false');
-  openPointsPanel();
-});
+}
 
-settingsTrigger.addEventListener('click', () => {
-  accountMenu.classList.remove('is-open');
-  accountMenu.setAttribute('aria-hidden', 'true');
-  loginTrigger.setAttribute('aria-expanded', 'false');
+let settingsReturnFocus = loginTrigger;
+function openSettingsView(returnFocus = loginTrigger) {
+  settingsReturnFocus = returnFocus;
+  closeAccountMenu();
   discoveryLayer.hidden = true;
   searchShell.hidden = true;
   settingsView.hidden = false;
   canvas?.classList.add('is-settings-view');
   settingsBack.focus();
+}
+
+pointsTrigger.addEventListener('click', () => {
+  closeAccountMenu();
+  openPointsPanel();
 });
+
+settingsTrigger.addEventListener('click', () => openSettingsView(loginTrigger));
 
 settingsBack.addEventListener('click', () => {
   settingsView.hidden = true;
   canvas?.classList.remove('is-settings-view');
   discoveryLayer.hidden = false;
   searchShell.hidden = false;
-  loginTrigger.focus();
+  settingsReturnFocus?.focus();
 });
 
 appearanceTrigger.addEventListener('click', () => {
@@ -601,6 +623,7 @@ function selectVertical(button) {
   const isToolbox = name === '工具箱';
   supportDrawer.classList.toggle('is-visible', !isToolbox);
   supportDrawer.setAttribute('aria-hidden', String(isToolbox));
+  renderMobileSubnav(name);
   const targetLeft = button.offsetLeft - (verticalsTrack.clientWidth - button.offsetWidth) / 2;
   verticalsTrack.scrollTo({ left: targetLeft, behavior: 'smooth' });
 }
@@ -658,6 +681,7 @@ const drawerPresets = {
   互助: ['话题广场', '失物回家', '闲置流转', '临时求助', '学习搭子', '技能交换', '拼行组队'],
   学习库: ['学习首页', '我的课程', '资料库', '学习计划', '笔记与收藏'],
 };
+const mobileToolboxTabs = [['all', '所有工具'], ['favorites', '我的收藏'], ['history', '我的历史']];
 
 const sidebarDefaults = { 综合: '随便看看', 互助: '话题广场', 学习库: '学习首页', 工具箱: 'all' };
 let activeVertical = '综合';
@@ -682,6 +706,70 @@ function getRememberedSidebarItem(vertical, preset) {
   return available.includes(remembered) ? remembered : (available[0] || sidebarDefaults.综合);
 }
 
+function syncMobileSubnavSelection(value) {
+  if (!mobileSubnavTrack) return;
+  let activeButton = null;
+  mobileSubnavTrack.querySelectorAll('[data-mobile-section]').forEach((button) => {
+    const active = button.dataset.mobileSection === value;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-selected', String(active));
+    if (active) activeButton = button;
+  });
+  if (activeButton && window.matchMedia('(max-width: 767px)').matches) {
+    window.requestAnimationFrame(() => {
+      const targetLeft = activeButton.offsetLeft - (mobileSubnavTrack.clientWidth - activeButton.offsetWidth) / 2;
+      const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      mobileSubnavTrack.scrollTo({ left: targetLeft, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
+  }
+}
+
+function renderMobileSubnav(vertical = activeVertical) {
+  if (!mobileSubnav || !mobileSubnavTrack) return;
+  const isToolbox = vertical === '工具箱';
+  const items = isToolbox
+    ? mobileToolboxTabs
+    : (drawerPresets[vertical] || []).map((label) => [label, label]);
+  const selected = isToolbox
+    ? toolboxActiveTab
+    : getRememberedSidebarItem(vertical, vertical);
+  mobileSubnav.setAttribute('aria-label', `${vertical}栏目`);
+  mobileSubnavTrack.innerHTML = items.map(([value, label]) => `<button type="button" role="tab" data-mobile-section="${value}" aria-selected="${value === selected}">${label}</button>`).join('');
+  mobileSubnav.hidden = false;
+  syncMobileSubnavSelection(selected);
+}
+
+mobileSubnavTrack?.addEventListener('click', (event) => {
+  const button = event.target.closest('[data-mobile-section]');
+  if (!button) return;
+  const value = button.dataset.mobileSection;
+  if (activeVertical === '工具箱') {
+    toolboxActiveTab = value;
+    sidebarState.工具箱 = value;
+    saveSidebarState();
+    renderToolbox();
+  } else {
+    sidebarState[activeVertical] = value;
+    saveSidebarState();
+    renderSupportResult(value);
+  }
+});
+
+mobileSubnavTrack?.addEventListener('keydown', (event) => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  const buttons = [...mobileSubnavTrack.querySelectorAll('[data-mobile-section]')];
+  const currentIndex = buttons.indexOf(document.activeElement);
+  if (currentIndex < 0) return;
+  event.preventDefault();
+  let nextIndex = currentIndex;
+  if (event.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + buttons.length) % buttons.length;
+  if (event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % buttons.length;
+  if (event.key === 'Home') nextIndex = 0;
+  if (event.key === 'End') nextIndex = buttons.length - 1;
+  buttons[nextIndex].focus();
+  buttons[nextIndex].click();
+});
+
 const drawerIcons = {
   '随便看看': '<circle cx="12" cy="12" r="8"/><path d="m14.8 9.2-2 4.1-3.6 1.5 2-4.1z"/>',
   '校园动态': '<path d="M4 20h16M6 20V9l6-4 6 4v11M9 20v-5h6v5M9 10h.01M15 10h.01"/>',
@@ -701,6 +789,208 @@ const drawerIcons = {
   '笔记与收藏': '<path d="M6 4h12v17l-6-3-6 3z"/><path d="m9 11 2 2 4-4"/>',
 };
 
+const mutualCardData = {
+  失物回家: [
+    { icon: '☂', tone: 'lost-umbrella', title: '黑色长柄雨伞', place: '明德楼一层门厅', time: '今天 08:40', status: '失物', description: '伞柄上有一圈浅灰色胶带，最后一次使用是在早课前。', contact: '李同学 · 站内联系', action: '联系失主' },
+    { icon: '📚', tone: 'lost-books', title: '蓝色帆布书袋', place: '图书馆三层靠窗区', time: '昨天 19:10', status: '失物', description: '袋内有两本专业课教材和一只银色签字笔，已交到图书馆服务台。', contact: '周同学 · 图书馆服务台', action: '联系失主' },
+    { icon: '🎧', tone: 'lost-headphones', title: '白色无线耳机盒', place: '世纪馆报告厅外', time: '9 月 16 日 16:30', status: '寻物', description: '透明保护壳上贴着一颗小树贴纸，希望有拾到的同学帮忙留意。', contact: '陈同学 · 站内联系', action: '联系发布者' },
+  ],
+  闲置流转: [
+    { icon: '🪑', tone: 'idle-chair', title: '宿舍折叠椅', price: '25 元', condition: '九成新', place: '品园一舍附近', time: '今天 10:15', description: '靠背和坐垫都保持良好，毕业离校前转出，支持现场查看。', contact: '王同学 · 站内联系', action: '联系发布者' },
+    { icon: '📖', tone: 'idle-books', title: '考研英语资料一套', price: '免费', condition: '八成新', place: '北区食堂门口', time: '昨天 21:00', description: '包含单词书、真题册和笔记，适合刚开始准备英语复习的同学。', contact: '赵同学 · 可约取件', action: '联系发布者' },
+    { icon: '🖥️', tone: 'idle-monitor', title: '24 英寸显示器', price: '180 元', condition: '九成新', place: '知行楼一层', time: '9 月 15 日', description: '1080p 分辨率，接口齐全，已恢复出厂设置，可现场通电检查。', contact: '高同学 · 站内联系', action: '联系发布者' },
+  ],
+  拼行组队: [
+    { icon: '🚄', tone: 'ride-train', title: '周末回济南，找两位同行', from: '中国人民大学', to: '济南西站', departure: '9 月 20 日 周六 13:30', remaining: '还差 2 人', transport: '高铁 · 费用 AA', contact: '许同学', description: '计划从学校一起出发到北京南站，路上可以互相照应。' },
+    { icon: '🚕', tone: 'ride-taxi', title: '机场线拼车，周一早上出发', from: '海淀校区东门', to: '首都机场 T3', departure: '9 月 22 日 周一 06:20', remaining: '还差 1 人', transport: '网约车 · 预计 35 元/人', contact: '林同学', description: '已预约 6 座车，途经中关村和望京，行李较多的同学优先。' },
+    { icon: '🚲', tone: 'ride-bike', title: '校园东区到西区，一起骑行', from: '品园南门', to: '世纪馆广场', departure: '今天 17:40', remaining: '还差 3 人', transport: '自行车 · 无费用', contact: '苏同学', description: '下课后顺路同行，节奏较慢，预计 20 分钟到达。' },
+  ],
+};
+
+function closeMutualDetail() {
+  resultItems.querySelector('.mutual-detail-layer')?.remove();
+}
+
+function openMutualDetail(item, category) {
+  closeMutualDetail();
+  const layer = document.createElement('div');
+  layer.className = 'mutual-detail-layer';
+  layer.setAttribute('role', 'dialog');
+  layer.setAttribute('aria-modal', 'true');
+  layer.setAttribute('aria-label', `${item.title}详情`);
+  const isRide = category === '拼行组队';
+  const isLost = category === '失物回家';
+  const info = isRide
+    ? `<div class="mutual-detail-info"><span>出发地<b>${item.from}</b></span><span>目的地<b>${item.to}</b></span><span>出发时间<b>${item.departure}</b></span><span>队伍状态<b>${item.remaining}</b></span></div>`
+    : `<div class="mutual-detail-info"><span>${isLost ? '地点' : '价格'}<b>${isLost ? item.place : item.price}</b></span><span>${isLost ? '发现时间' : '物品成色'}<b>${isLost ? item.time : item.condition}</b></span><span>${isLost ? '状态' : '交易地点'}<b>${isLost ? item.status : item.place}</b></span></div>`;
+  layer.innerHTML = `<article class="mutual-detail-card ${isRide ? 'is-ride-detail' : ''}"><button class="mutual-detail-close" type="button" aria-label="关闭详情">×</button><span class="mutual-detail-eyebrow">${category} · 详情</span><div class="mutual-detail-art mutual-art-${item.tone}" aria-hidden="true"><span>${item.icon}</span></div><h2>${item.title}</h2>${info}<p>${item.description}</p><div class="mutual-detail-contact"><span>发起人 / 联系方式</span><b>${item.contact}</b></div><div class="mutual-detail-actions"><button class="mutual-detail-primary" type="button">${isRide ? '加入组队' : item.action}</button><button class="mutual-detail-secondary" type="button">☆ 收藏</button></div></article>`;
+  resultItems.append(layer);
+  const close = () => closeMutualDetail();
+  layer.querySelector('.mutual-detail-close').addEventListener('click', close);
+  layer.addEventListener('click', (event) => { if (event.target === layer) close(); });
+  layer.querySelector('.mutual-detail-primary').addEventListener('click', () => showToast(`${isRide ? '加入组队' : '联系发起人'}功能为前端演示`));
+  layer.querySelector('.mutual-detail-secondary').addEventListener('click', (event) => { event.currentTarget.textContent = '★ 已收藏'; showToast('已收藏（本地演示）'); });
+  layer.querySelector('.mutual-detail-close').focus();
+}
+
+function renderMutualCards(category) {
+  const items = mutualCardData[category] || [];
+  const isRide = category === '拼行组队';
+  resultItems.innerHTML = `<section class="mutual-cards-page ${isRide ? 'is-ride-page' : ''}" aria-label="${category}"><header class="mutual-cards-head"><span class="campus-eyebrow">${category}</span><h2>${category}</h2><p>${isRide ? '把出发时间和同行信息说清楚，轻松找到顺路伙伴。' : category === '失物回家' ? '让遗失的物品回到主人手里。' : '把暂时不用的物品留给真正需要的人。'}</p></header><div class="mutual-card-grid">${items.map((item) => `<article class="mutual-card ${isRide ? 'is-ride-card' : ''}" tabindex="0" data-mutual-card="${items.indexOf(item)}"><div class="mutual-card-art mutual-art-${item.tone}" aria-label="${item.title}插画"><span>${item.icon}</span></div><div class="mutual-card-body"><div class="mutual-card-kicker">${isRide ? item.remaining : item.status || item.condition}</div><h3>${item.title}</h3>${isRide ? `<div class="mutual-route"><span>${item.from}</span><b>→</b><span>${item.to}</span></div><p>${item.departure}</p><div class="mutual-card-meta"><span>${item.transport}</span><span>${item.contact}</span></div>` : `<p>${item.place}</p><div class="mutual-card-meta"><span>${item.time || item.price}</span><span>${item.condition || item.status}</span></div>`}</div></article>`).join('')}</div></section>`;
+  resultItems.hidden = false;
+  resultItems.querySelectorAll('[data-mutual-card]').forEach((card) => {
+    const item = items[Number(card.dataset.mutualCard)];
+    card.addEventListener('click', () => openMutualDetail(item, category));
+    card.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openMutualDetail(item, category); } });
+  });
+  setSupportSelection(category);
+}
+
+const defaultLearningPlans = [
+  { id: 'plan-math', title: '完成高等数学（二）第三章复习', course: '高等数学（二）', deadline: '本周五', tasks: [{ title: '整理偏导数公式', done: true }, { title: '完成课后题 3、5、8', done: false }, { title: '订正错题并写下疑问', done: false }] },
+  { id: 'plan-writing', title: '完成城市与社会课程论文提纲', course: '城市与社会', deadline: '下周一', tasks: [{ title: '确定一个可观察的公共空间', done: true }, { title: '补充三篇参考文献', done: false }, { title: '完成研究问题和方法部分', done: false }] },
+];
+const defaultLearningNotes = [
+  { id: 'note-limit', title: '极限题的三种常见拆解方式', summary: '先判断趋近方式，再决定使用等价无穷小、夹逼定理或洛必达法则。', course: '高等数学（二）', type: '学习笔记', updated: '今天 09:20', favorite: true, body: '遇到含根式的极限，优先尝试有理化；分式结构则先比较分子分母的最高阶。做完后补写每一步选择方法的理由。' },
+  { id: 'note-space', title: '公共空间观察记录：停留比经过更重要', summary: '同一处座椅在午间和傍晚呈现完全不同的使用方式。', course: '城市与社会', type: '课堂记录', updated: '昨天 18:40', favorite: false, body: '观察时记录时间、人数、停留时长和行为，而不是只描述“人很多”。这能帮助后续把空间感受转成可比较的材料。' },
+  { id: 'note-english', title: '四级阅读错题：先找转折再定位答案', summary: 'however、rather than、in contrast 往往决定句子的真正方向。', course: '大学英语（四）', type: '复习摘录', updated: '9 月 16 日', favorite: true, body: '做题时先读题干和选项，再回到原文定位。遇到同义替换，不要只找原词，要确认句子之间的逻辑关系。' },
+];
+let learningPlans = [];
+let learningNotes = [];
+try {
+  learningPlans = JSON.parse(localStorage.getItem('zaichang-learning-plans') || 'null');
+  learningNotes = JSON.parse(localStorage.getItem('zaichang-learning-notes') || 'null');
+} catch { /* ignore unavailable or invalid storage */ }
+if (!Array.isArray(learningPlans)) learningPlans = defaultLearningPlans;
+if (!Array.isArray(learningNotes)) learningNotes = defaultLearningNotes;
+function saveLearningPlans() { try { localStorage.setItem('zaichang-learning-plans', JSON.stringify(learningPlans)); } catch { /* ignore unavailable storage */ } }
+function saveLearningNotes() { try { localStorage.setItem('zaichang-learning-notes', JSON.stringify(learningNotes)); } catch { /* ignore unavailable storage */ } }
+function planProgress(plan) { const total = plan.tasks.length || 1; const completed = plan.tasks.filter((task) => task.done).length; return { completed, total, percent: Math.round(completed / total * 100) }; }
+
+function closeLearningLayer(selector = '.learning-detail-layer,.learning-editor-layer') {
+  resultItems.querySelector(selector)?.remove();
+}
+
+function openLearningPlanDetail(plan) {
+  closeLearningLayer();
+  const layer = document.createElement('div');
+  layer.className = 'learning-detail-layer';
+  layer.setAttribute('role', 'dialog');
+  layer.setAttribute('aria-modal', 'true');
+  layer.setAttribute('aria-label', `${plan.title}计划详情`);
+  const progress = planProgress(plan);
+  layer.innerHTML = `<article class="learning-detail-card"><button class="learning-layer-close" type="button" aria-label="关闭计划详情">×</button><span class="learning-detail-label">计划详情</span><h2>${escapeVoteText(plan.title)}</h2><div class="learning-detail-meta"><span>${escapeVoteText(plan.course)}</span><span>截止 ${escapeVoteText(plan.deadline)}</span><b>${progress.completed}/${progress.total} 项完成</b></div><div class="learning-task-list">${plan.tasks.map((task, index) => `<label class="learning-task${task.done ? ' is-done' : ''}"><input type="checkbox" data-plan-task="${index}"${task.done ? ' checked' : ''} /><span>${escapeVoteText(task.title)}</span></label>`).join('')}</div><div class="learning-detail-actions"><button type="button" class="learning-primary-action" data-plan-edit>编辑计划</button><button type="button" class="learning-light-action" data-plan-delete>删除计划</button></div></article>`;
+  resultItems.append(layer);
+  const close = () => closeLearningLayer('.learning-detail-layer');
+  layer.querySelector('.learning-layer-close').addEventListener('click', close);
+  layer.addEventListener('click', (event) => { if (event.target === layer) close(); });
+  layer.querySelectorAll('[data-plan-task]').forEach((checkbox) => checkbox.addEventListener('change', () => {
+    plan.tasks[Number(checkbox.dataset.planTask)].done = checkbox.checked;
+    saveLearningPlans();
+    checkbox.closest('.learning-task').classList.toggle('is-done', checkbox.checked);
+    const nextProgress = planProgress(plan);
+    layer.querySelector('.learning-detail-meta b').textContent = `${nextProgress.completed}/${nextProgress.total} 项完成`;
+  }));
+  layer.querySelector('[data-plan-edit]').addEventListener('click', () => { close(); openLearningPlanEditor(plan); });
+  layer.querySelector('[data-plan-delete]').addEventListener('click', () => {
+    if (!window.confirm('确定删除这个学习计划吗？')) return;
+    learningPlans = learningPlans.filter((item) => item.id !== plan.id);
+    saveLearningPlans();
+    close();
+    renderLearningPlans();
+  });
+  layer.querySelector('.learning-layer-close').focus();
+}
+
+function openLearningPlanEditor(existing = null) {
+  closeLearningLayer();
+  const layer = document.createElement('div');
+  layer.className = 'learning-editor-layer';
+  layer.setAttribute('role', 'dialog');
+  layer.setAttribute('aria-modal', 'true');
+  layer.setAttribute('aria-label', existing ? '编辑学习计划' : '新建学习计划');
+  const tasks = existing ? existing.tasks.map((task) => task.title).join('\n') : '';
+  layer.innerHTML = `<article class="learning-editor-card"><button class="learning-layer-close" type="button" aria-label="关闭编辑">×</button><span class="learning-detail-label">${existing ? '编辑计划' : '新建计划'}</span><h2>${existing ? '编辑学习计划' : '新建学习计划'}</h2><form data-plan-form><label><span>计划目标</span><input name="title" required value="${existing ? escapeVoteText(existing.title) : ''}" placeholder="例如：完成本周高数复习" /></label><label><span>关联课程</span><input name="course" value="${existing ? escapeVoteText(existing.course) : ''}" placeholder="例如：高等数学（二）" /></label><label><span>截止时间</span><input name="deadline" value="${existing ? escapeVoteText(existing.deadline) : ''}" placeholder="例如：本周五" /></label><label><span>子任务（每行一项）</span><textarea name="tasks" rows="5" placeholder="整理课堂笔记\n完成练习题">${escapeVoteText(tasks)}</textarea></label><button class="learning-primary-action" type="submit">保存计划</button></form></article>`;
+  resultItems.append(layer);
+  const close = () => closeLearningLayer('.learning-editor-layer');
+  layer.querySelector('.learning-layer-close').addEventListener('click', close);
+  layer.addEventListener('click', (event) => { if (event.target === layer) close(); });
+  layer.querySelector('[data-plan-form]').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const taskTitles = String(formData.get('tasks') || '').split('\n').map((title) => title.trim()).filter(Boolean);
+    const next = { id: existing?.id || `plan-${Date.now()}`, title: String(formData.get('title') || '').trim(), course: String(formData.get('course') || '').trim() || '自主学习', deadline: String(formData.get('deadline') || '').trim() || '待定', tasks: taskTitles.map((title) => ({ title, done: existing?.tasks.find((task) => task.title === title)?.done || false })) };
+    if (!next.tasks.length) next.tasks = [{ title: '补充第一个子任务', done: false }];
+    if (existing) learningPlans = learningPlans.map((item) => item.id === existing.id ? next : item); else learningPlans = [next, ...learningPlans];
+    saveLearningPlans();
+    close();
+    renderLearningPlans();
+  });
+  layer.querySelector('input').focus();
+}
+
+function renderLearningPlans() {
+  const totalTasks = learningPlans.reduce((sum, plan) => sum + plan.tasks.length, 0);
+  const completedTasks = learningPlans.reduce((sum, plan) => sum + plan.tasks.filter((task) => task.done).length, 0);
+  const todayTasks = learningPlans.flatMap((plan) => plan.tasks.filter((task) => !task.done).slice(0, 1).map((task) => ({ ...task, course: plan.course })));
+  resultItems.innerHTML = `<section class="learning-plans-page" aria-label="学习计划"><header class="learning-plans-head"><div><span class="campus-eyebrow">学习安排</span><h2>学习计划</h2><p>把这一周要完成的事情拆开，一项一项推进。</p></div><button type="button" class="learning-primary-action" data-plan-new>＋ 新建计划</button></header><div class="learning-overview-grid"><article class="learning-overview-card"><span>本周进度</span><strong>${completedTasks}/${totalTasks || 0}</strong><div class="learning-progress-bar"><i style="width:${totalTasks ? Math.round(completedTasks / totalTasks * 100) : 0}%"></i></div><small>${totalTasks ? Math.round(completedTasks / totalTasks * 100) : 0}% 已完成</small></article><article class="learning-overview-card"><span>今日任务</span><strong>${todayTasks.length}</strong><div class="learning-today-list">${todayTasks.length ? todayTasks.map((task) => `<p>· ${escapeVoteText(task.title)}<small>${escapeVoteText(task.course)}</small></p>`).join('') : '<p>今天的计划已完成</p>'}</div></article></div><div class="learning-section-heading"><h3>我的计划</h3><span>${learningPlans.length} 个计划</span></div><div class="learning-plan-grid">${learningPlans.map((plan) => { const progress = planProgress(plan); return `<article class="learning-plan-card" tabindex="0" data-plan-id="${plan.id}"><div class="learning-plan-top"><span>${escapeVoteText(plan.course)}</span><b>${escapeVoteText(plan.deadline)}</b></div><h3>${escapeVoteText(plan.title)}</h3><p>${progress.completed}/${progress.total} 项子任务完成</p><div class="learning-progress-bar"><i style="width:${progress.percent}%"></i></div><div class="learning-plan-foot"><span>${progress.percent}%</span><span>查看详情 →</span></div></article>`; }).join('')}</div></section>`;
+  resultItems.hidden = false;
+  resultItems.querySelector('[data-plan-new]').addEventListener('click', () => openLearningPlanEditor());
+  resultItems.querySelectorAll('[data-plan-id]').forEach((card) => { const plan = learningPlans.find((item) => item.id === card.dataset.planId); card.addEventListener('click', () => openLearningPlanDetail(plan)); card.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openLearningPlanDetail(plan); } }); });
+  setSupportSelection('学习计划');
+}
+
+function openLearningNoteDetail(note) {
+  closeLearningLayer();
+  const layer = document.createElement('div');
+  layer.className = 'learning-detail-layer';
+  layer.setAttribute('role', 'dialog');
+  layer.setAttribute('aria-modal', 'true');
+  layer.setAttribute('aria-label', `${note.title}笔记详情`);
+  layer.innerHTML = `<article class="learning-detail-card note-detail-card"><button class="learning-layer-close" type="button" aria-label="关闭笔记详情">×</button><span class="learning-detail-label">${escapeVoteText(note.type)} · ${escapeVoteText(note.course)}</span><h2>${escapeVoteText(note.title)}</h2><p class="note-detail-body">${escapeVoteText(note.body || note.summary)}</p><div class="learning-detail-meta"><span>更新于 ${escapeVoteText(note.updated)}</span><b>${note.favorite ? '已收藏' : '未收藏'}</b></div><div class="learning-detail-actions"><button type="button" class="learning-primary-action" data-note-edit>编辑笔记</button><button type="button" class="learning-light-action" data-note-delete>删除笔记</button></div></article>`;
+  resultItems.append(layer);
+  const close = () => closeLearningLayer('.learning-detail-layer');
+  layer.querySelector('.learning-layer-close').addEventListener('click', close);
+  layer.addEventListener('click', (event) => { if (event.target === layer) close(); });
+  layer.querySelector('[data-note-edit]').addEventListener('click', () => { close(); openLearningNoteEditor(note); });
+  layer.querySelector('[data-note-delete]').addEventListener('click', () => { if (!window.confirm('确定删除这条笔记吗？')) return; learningNotes = learningNotes.filter((item) => item.id !== note.id); saveLearningNotes(); close(); renderLearningNotes(); });
+  layer.querySelector('.learning-layer-close').focus();
+}
+
+function openLearningNoteEditor(existing = null) {
+  closeLearningLayer();
+  const layer = document.createElement('div');
+  layer.className = 'learning-editor-layer';
+  layer.setAttribute('role', 'dialog');
+  layer.setAttribute('aria-modal', 'true');
+  layer.setAttribute('aria-label', existing ? '编辑笔记' : '新建笔记');
+  layer.innerHTML = `<article class="learning-editor-card"><button class="learning-layer-close" type="button" aria-label="关闭编辑">×</button><span class="learning-detail-label">${existing ? '编辑笔记' : '新建笔记'}</span><h2>${existing ? '编辑学习笔记' : '新建学习笔记'}</h2><form data-note-form><label><span>标题</span><input name="title" required value="${existing ? escapeVoteText(existing.title) : ''}" placeholder="输入笔记标题" /></label><label><span>关联课程</span><input name="course" value="${existing ? escapeVoteText(existing.course) : ''}" placeholder="例如：大学英语（四）" /></label><label><span>类型</span><input name="type" value="${existing ? escapeVoteText(existing.type) : '学习笔记'}" placeholder="例如：学习笔记" /></label><label><span>摘要</span><textarea name="summary" rows="2" required placeholder="用一句话概括这条笔记">${existing ? escapeVoteText(existing.summary) : ''}</textarea></label><label><span>正文</span><textarea name="body" rows="5" placeholder="写下具体内容">${existing ? escapeVoteText(existing.body || existing.summary) : ''}</textarea></label><button class="learning-primary-action" type="submit">保存笔记</button></form></article>`;
+  resultItems.append(layer);
+  const close = () => closeLearningLayer('.learning-editor-layer');
+  layer.querySelector('.learning-layer-close').addEventListener('click', close);
+  layer.addEventListener('click', (event) => { if (event.target === layer) close(); });
+  layer.querySelector('[data-note-form]').addEventListener('submit', (event) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const next = { id: existing?.id || `note-${Date.now()}`, title: String(formData.get('title') || '').trim(), course: String(formData.get('course') || '').trim() || '自主学习', type: String(formData.get('type') || '').trim() || '学习笔记', summary: String(formData.get('summary') || '').trim(), body: String(formData.get('body') || '').trim() || String(formData.get('summary') || '').trim(), updated: '刚刚', favorite: existing?.favorite || false };
+    if (existing) learningNotes = learningNotes.map((item) => item.id === existing.id ? next : item); else learningNotes = [next, ...learningNotes];
+    saveLearningNotes();
+    close();
+    renderLearningNotes();
+  });
+  layer.querySelector('input').focus();
+}
+
+function renderLearningNotes() {
+  resultItems.innerHTML = `<section class="learning-notes-page" aria-label="笔记与收藏"><header class="learning-notes-head"><div><span class="campus-eyebrow">学习记录</span><h2>笔记与收藏</h2><p>把值得回看的课堂片段和复习线索留在这里。</p></div><button type="button" class="learning-primary-action" data-note-new>＋ 新建笔记</button></header><div class="learning-note-grid">${learningNotes.map((note) => `<article class="learning-note-card" tabindex="0" data-note-id="${note.id}"><div class="learning-note-top"><span>${escapeVoteText(note.type)}</span><button type="button" class="learning-note-favorite" data-note-favorite="${note.id}" aria-label="${note.favorite ? '取消收藏' : '收藏'} ${escapeVoteText(note.title)}">${note.favorite ? '★' : '☆'}</button></div><h3>${escapeVoteText(note.title)}</h3><p>${escapeVoteText(note.summary)}</p><div class="learning-note-meta"><span>${escapeVoteText(note.course)}</span><span>${escapeVoteText(note.updated)}</span></div></article>`).join('')}</div></section>`;
+  resultItems.hidden = false;
+  resultItems.querySelector('[data-note-new]').addEventListener('click', () => openLearningNoteEditor());
+  resultItems.querySelectorAll('[data-note-id]').forEach((card) => { const note = learningNotes.find((item) => item.id === card.dataset.noteId); card.addEventListener('click', (event) => { if (event.target.closest('[data-note-favorite]')) return; openLearningNoteDetail(note); }); card.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); openLearningNoteDetail(note); } }); });
+  resultItems.querySelectorAll('[data-note-favorite]').forEach((button) => button.addEventListener('click', (event) => { event.stopPropagation(); const note = learningNotes.find((item) => item.id === button.dataset.noteFavorite); note.favorite = !note.favorite; saveLearningNotes(); renderLearningNotes(); }));
+  setSupportSelection('笔记与收藏');
+}
+
 function setDrawerPreset(preset) {
   const labels = drawerPresets[preset] || drawerPresets.综合;
   const title = preset === '综合' ? '综合' : preset === '互助' ? '互助' : '学习库';
@@ -718,12 +1008,16 @@ function setSupportSelection(category) {
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', String(active));
   });
+  syncMobileSubnavSelection(category);
 }
 
 function renderSupportResult(category) {
   if (category === '学习首页') { renderLearningHome(); setSupportSelection(category); return; }
   if (category === '我的课程') { renderCourseTable(); setSupportSelection(category); return; }
   if (category === '资料库') { renderResourceLibrary(); setSupportSelection(category); return; }
+  if (category === '学习计划') { renderLearningPlans(); return; }
+  if (category === '笔记与收藏') { renderLearningNotes(); return; }
+  if (mutualCardData[category]) { renderMutualCards(category); return; }
   if (category === '校园动态') {
     renderCampusBoard();
     setSupportSelection(category);
@@ -768,9 +1062,14 @@ function renderSupportResult(category) {
 }
 
 function renderProfilePage() {
-  resultItems.innerHTML = `<section class="profile-page" aria-label="我的个人主页"><header class="profile-cover"><div class="profile-cover-art"></div><div class="profile-identity"><div class="profile-avatar">${avatarMarkup('林予安', '林')}</div><div><h2>林予安</h2><p>英语 2302 · 喜欢摄影、猫和夜跑</p><div class="profile-tags"><span>校园摄影</span><span>音乐</span><span>阅读</span></div></div><button type="button" class="profile-edit">编辑主页</button></div></header><div class="profile-tabs"><button class="is-active" type="button">主页</button><button type="button">我的发布</button><button type="button">收藏</button><button type="button">关注</button><button type="button">连接记录</button></div><div class="profile-grid"><aside class="profile-sidebar"><h3>关于我</h3><p>记录校园里值得停下来的瞬间，也在寻找一起学习和散步的人。</p><div class="profile-stats"><b>24<small>关注</small></b><b>128<small>获赞</small></b><b>16<small>连接</small></b></div></aside><main class="profile-main"><div class="profile-section-head"><span class="campus-eyebrow">FEATURED</span><h3>精选</h3></div><div class="profile-feature-grid"><article class="profile-feature feature-photo"><span>校园摄影</span><h4>雨后的校园</h4></article><article class="profile-feature feature-note"><span>最近的一段经历</span><h4>把路灯下的影子拍下来，发现校园会在夜里变得很温柔。</h4></article><article class="profile-feature feature-collection"><span>收藏的话题</span><h4>期末周图书馆要不要延长开放？</h4></article></div><div class="profile-section-head"><span class="campus-eyebrow">RECENT POSTS</span><h3>最近发布</h3></div><article class="profile-post"><div><span class="campus-eyebrow">校园生活 · 28 分钟前</span><h4>雨后的校园，适合散步也适合发呆</h4><p>下课后绕着湖边走了一圈，发现校园在雨里有另一种安静。</p></div><span class="profile-post-meta">24 ♡　3 ◌</span></article></main><aside class="profile-right"><h3>最近关注</h3><p>周砚 · 摄影</p><p>校园夜跑组 · 运动</p><h3>我的连接</h3><p>四级词汇搭子</p><p>草坪音乐会 · 已参加</p></aside></div></section>`;
+  resultItems.innerHTML = `<section class="profile-page" aria-label="我的个人主页"><header class="profile-cover"><div class="profile-cover-art"></div><div class="profile-identity"><div class="profile-avatar">${avatarMarkup('林予安', '林')}</div><div><h2>林予安</h2><p>英语 2302 · 喜欢摄影、猫和夜跑</p><div class="profile-tags"><span>校园摄影</span><span>音乐</span><span>阅读</span></div></div><button type="button" class="profile-edit">编辑主页</button></div></header><section class="profile-account-panel" aria-label="账户快捷操作"><button type="button" data-profile-account="login"><span>登录账户</span><small>手机号或邮箱登录</small></button><button type="button" data-profile-account="points"><span>我的积分</span><small>查看余额与记录</small></button><button type="button" data-profile-account="settings"><span>设置</span><small>外观、账号与安全</small></button></section><div class="profile-tabs"><button class="is-active" type="button">主页</button><button type="button">我的发布</button><button type="button">收藏</button><button type="button">关注</button><button type="button">连接记录</button></div><div class="profile-grid"><aside class="profile-sidebar"><h3>关于我</h3><p>记录校园里值得停下来的瞬间，也在寻找一起学习和散步的人。</p><div class="profile-stats"><b>24<small>关注</small></b><b>128<small>获赞</small></b><b>16<small>连接</small></b></div></aside><main class="profile-main"><div class="profile-section-head"><span class="campus-eyebrow">FEATURED</span><h3>精选</h3></div><div class="profile-feature-grid"><article class="profile-feature feature-photo"><span>校园摄影</span><h4>雨后的校园</h4></article><article class="profile-feature feature-note"><span>最近的一段经历</span><h4>把路灯下的影子拍下来，发现校园会在夜里变得很温柔。</h4></article><article class="profile-feature feature-collection"><span>收藏的话题</span><h4>期末周图书馆要不要延长开放？</h4></article></div><div class="profile-section-head"><span class="campus-eyebrow">RECENT POSTS</span><h3>最近发布</h3></div><article class="profile-post"><div><span class="campus-eyebrow">校园生活 · 28 分钟前</span><h4>雨后的校园，适合散步也适合发呆</h4><p>下课后绕着湖边走了一圈，发现校园在雨里有另一种安静。</p></div><span class="profile-post-meta">24 ♡　3 ◌</span></article></main><aside class="profile-right"><h3>最近关注</h3><p>周砚 · 摄影</p><p>校园夜跑组 · 运动</p><h3>我的连接</h3><p>四级词汇搭子</p><p>草坪音乐会 · 已参加</p></aside></div></section>`;
   resultItems.hidden = false;
   resultItems.querySelector('.profile-edit').addEventListener('click',()=>showToast('编辑主页将在下一层接入'));
+  resultItems.querySelectorAll('[data-profile-account]').forEach((button) => button.addEventListener('click', () => {
+    if (button.dataset.profileAccount === 'login') openLoginDialog();
+    else if (button.dataset.profileAccount === 'points') openPointsPanel();
+    else openSettingsView(button);
+  }));
 }
 
 const discussionThreads = [
@@ -1094,6 +1393,7 @@ function renderToolbox() {
   const tabs = [['all', '所有工具'], ['favorites', '我的收藏'], ['history', '我的历史']];
   resultItems.innerHTML = `<section class="toolbox-page" aria-label="工具箱"><header class="toolbox-head"><h2>工具箱</h2><nav class="toolbox-tabs" aria-label="工具箱分类">${tabs.map(([id, label]) => `<button type="button" class="${toolboxActiveTab === id ? 'is-active' : ''}" data-toolbox-tab="${id}" aria-selected="${toolboxActiveTab === id}">${label}</button>`).join('')}</nav></header><div class="toolbox-grid">${visibleItems.map(([name, tone]) => { const coverData = toolboxCoverMap[name]; const coverClass = coverData ? ` ${coverData[1]}` : ''; return `<article class="tool-card ${tone}${coverClass}" aria-label="${name}" role="button" tabindex="0" data-tool="${name}">${coverData ? `<img src="${coverData[0]}" alt="${name}封面插画" decoding="async" />` : ''}<button class="tool-favorite" type="button" aria-label="${toolboxFavorites.includes(name) ? '移出收藏' : '加入收藏'}：${name}" aria-pressed="${toolboxFavorites.includes(name)}">${toolboxFavorites.includes(name) ? '★' : '☆'}</button></article>`; }).join('')}</div></section>`;
   resultItems.hidden = false;
+  syncMobileSubnavSelection(toolboxActiveTab);
   resultItems.querySelectorAll('[data-toolbox-tab]').forEach((tab) => tab.addEventListener('click', () => { toolboxActiveTab = tab.dataset.toolboxTab; sidebarState.工具箱 = toolboxActiveTab; saveSidebarState(); renderToolbox(); }));
   resultItems.querySelectorAll('[data-tool]').forEach((card) => {
     card.addEventListener('click', (event) => { if (event.target.closest('.tool-favorite')) return; openToolboxTool(card.dataset.tool); });
@@ -1625,3 +1925,4 @@ function renderCampusBoard() {
 setDrawerPreset('综合');
 const initialSidebarItem = getRememberedSidebarItem('综合', '综合');
 renderSupportResult(initialSidebarItem);
+renderMobileSubnav('综合');
