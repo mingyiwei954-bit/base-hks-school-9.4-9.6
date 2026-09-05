@@ -6,51 +6,84 @@
     <meta name="theme-color" content="#f6f3eb" />
     <meta name="description" content="在场——从一次搜索，遇见此刻恰好在场的人。" />
     <title>在场 · 搜索</title>
-    <link rel="stylesheet" href="./styles.css?v=6" />
+    <link rel="stylesheet" href="./styles.css?v=92" />
   </head>
   <body>
     <main class="canvas" aria-label="在场主界面">
       <div class="ambient ambient-one" aria-hidden="true"></div>
       <div class="ambient ambient-two" aria-hidden="true"></div>
 
+      <a class="hanging-emblem" href="#" aria-label="中国人民大学首页占位">
+        <span class="emblem-crop" aria-hidden="true">
+          <img src="https://www.ruc.edu.cn/template/1/out/imgs/VI/1.png" alt="" />
+        </span>
+      </a>
+
       <header class="top-rail" aria-label="顶部导航">
         <a class="university-mark" href="#" aria-label="中国人民大学首页占位">
-          <span class="emblem-crop" aria-hidden="true">
-            <img src="https://www.ruc.edu.cn/template/1/out/imgs/VI/1.png" alt="" />
-          </span>
           <span class="university-name">
             <strong>中国人民大学</strong>
             <small>RENMIN UNIVERSITY OF CHINA</small>
           </span>
         </a>
 
-        <button class="login-trigger" id="loginTrigger" type="button" aria-haspopup="dialog">
+        <button class="login-trigger" id="loginTrigger" type="button" aria-haspopup="menu" aria-expanded="false">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <circle cx="12" cy="8" r="3.4"></circle>
             <path d="M5.8 20a6.2 6.2 0 0 1 12.4 0"></path>
           </svg>
           <span>登录</span>
         </button>
+        <div class="account-menu" id="accountMenu" role="menu" aria-label="账户菜单" aria-hidden="true">
+          <button type="button" role="menuitem" id="pointsTrigger">我的积分</button>
+          <button type="button" role="menuitem" id="settingsTrigger">设置</button>
+          <button type="button" role="menuitem" id="logoutTrigger">退出登录</button>
+        </div>
       </header>
 
       <section class="discovery-layer" aria-label="搜索栏目与结果">
         <nav class="verticals-shell" aria-label="Search Verticals">
           <div class="verticals-track" id="verticalsTrack" role="tablist" aria-label="搜索栏目">
             <button class="is-active" type="button" role="tab" aria-selected="true" data-vertical="综合">综合</button>
-            <button type="button" role="tab" aria-selected="false" data-vertical="校园">校园</button>
-            <button type="button" role="tab" aria-selected="false" data-vertical="课程">课程</button>
-            <button type="button" role="tab" aria-selected="false" data-vertical="活动">活动</button>
-            <button type="button" role="tab" aria-selected="false" data-vertical="社团">社团</button>
-            <button type="button" role="tab" aria-selected="false" data-vertical="同学">同学</button>
-            <button type="button" role="tab" aria-selected="false" data-vertical="资源">资源</button>
-            <button type="button" role="tab" aria-selected="false" data-vertical="地点">地点</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="互助">互助</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="学习库">学习库</button>
+            <button type="button" role="tab" aria-selected="false" data-vertical="工具箱">工具箱</button>
           </div>
         </nav>
 
-        <section class="serp-stage" aria-labelledby="serpTitle">
-          <p class="serp-kicker">SERP · 自然搜索</p>
-          <h1 id="serpTitle"><span id="verticalName">综合</span>栏目</h1>
-          <p id="serpDescription">自然搜索结果将在这里呈现。当前只保留结果区域，不添加卡片或通用结果框架。</p>
+        <section class="serp-stage" aria-label="搜索结果">
+
+          <section class="result-items" id="resultItems" aria-label="互助搜索结果" hidden></section>
+
+          <aside class="support-drawer is-visible" id="supportDrawer" aria-label="互助快捷栏目" aria-hidden="false">
+            <div class="support-drawer-inner">
+              <div class="support-drawer-title" aria-hidden="true">综合</div>
+              <button class="support-item" type="button" data-support="随便看看" aria-label="随便看看">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"></circle><path d="m12 7 1.5 3.5L17 12l-3.5 1.5L12 17l-1.5-3.5L7 12l3.5-1.5z"></path></svg></span><span class="support-label">随便看看</span>
+              </button>
+              <button class="support-item" type="button" data-support="校园动态" aria-label="校园动态">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 19V9l8-5 8 5v10M7 19v-6h10v6M3 20h18"/></svg></span><span class="support-label">校园动态</span>
+              </button>
+              <button class="support-item" type="button" data-support="热门互助" aria-label="热门互助">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m12 3 2.2 5.1 5.5.5-4.1 3.6 1.2 5.4-4.8-2.8-4.8 2.8 1.2-5.4-4.1-3.6 5.5-.5z"/></svg></span><span class="support-label">热门互助</span>
+              </button>
+              <button class="support-item" type="button" data-support="附近正在发生" aria-label="附近正在发生">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.1 7-11a7 7 0 1 0-14 0c0 4.9 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg></span><span class="support-label">附近正在发生</span>
+              </button>
+              <button class="support-item" type="button" data-support="同校同学" aria-label="同校同学">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3.5 19a5.5 5.5 0 0 1 11 0M14 19a4.5 4.5 0 0 1 6.5 0"/></svg></span><span class="support-label">同校同学</span>
+              </button>
+              <button class="support-item" type="button" data-support="兴趣圈子" aria-label="兴趣圈子">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="8" cy="16" r="3"/><circle cx="16" cy="16" r="3"/></svg></span><span class="support-label">兴趣圈子</span>
+              </button>
+              <button class="support-item" type="button" data-support="今日推荐" aria-label="今日推荐">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3v18M3 12h18M5.6 5.6l12.8 12.8M18.4 5.6 5.6 18.4"/></svg></span><span class="support-label">今日推荐</span>
+              </button>
+              <button class="support-item" type="button" data-support="我的收藏" aria-label="我的收藏">
+                <span class="support-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 4h12v17l-6-3-6 3z"/></svg></span><span class="support-label">我的收藏</span>
+              </button>
+            </div>
+          </aside>
         </section>
       </section>
 
@@ -72,6 +105,11 @@
               autocomplete="off"
               enterkeyhint="search"
             />
+            <div class="page-search-controls" id="pageSearchControls" aria-live="polite" hidden>
+              <span id="pageSearchCount">输入关键词开始查找</span>
+              <button type="button" id="pageSearchPrev" aria-label="上一个匹配项">↑</button>
+              <button type="button" id="pageSearchNext" aria-label="下一个匹配项">↓</button>
+            </div>
 
             <button class="utility-action" id="voiceAction" type="button" aria-label="切换到按住说话">
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -127,6 +165,25 @@
         <span aria-hidden="true">·</span>
         <p id="toastMessage">搜索能力将在下一层接入</p>
       </div>
+
+      <section class="settings-view" id="settingsView" aria-label="账户设置" hidden>
+        <button class="settings-back" id="settingsBack" type="button" aria-label="返回主页面">← 返回</button>
+        <p class="settings-kicker">SETTINGS</p>
+        <h1>账户设置</h1>
+        <p class="settings-intro">管理个人资料、登录安全，以及当前账户保存的学习数据。</p>
+        <div class="settings-list">
+          <button class="settings-row" id="appearanceTrigger" type="button"><span class="settings-row-icon">◌</span><span><b>外观与主题</b><small id="currentThemeName">当前：经典绿</small></span><i>›</i></button>
+          <button class="settings-row" type="button"><span class="settings-row-icon">⌘</span><span><b>分享管理</b><small>查看、复制或撤销公开的内容</small></span><i>›</i></button>
+          <div class="settings-row settings-account"><span class="settings-row-icon">♙</span><span><b>账号</b><small>在场演示用户 · mingyiwei954@gmail.com</small></span><button type="button">修改</button></div>
+          <div class="settings-row settings-account"><span class="settings-row-icon">▣</span><span><b>安全</b><small>密码与登录安全</small></span><button type="button">修改</button></div>
+        </div>
+        <section class="theme-panel" id="themePanel" aria-label="选择主题" hidden>
+          <button class="theme-back" id="themeBack" type="button">← 返回设置</button>
+          <h2>主题色</h2>
+          <p>选择一个适合此刻的校园色彩。</p>
+          <div class="theme-grid" id="themeGrid" role="radiogroup" aria-label="选择主题色"></div>
+        </section>
+      </section>
     </main>
 
     <dialog class="login-dialog" id="loginDialog" aria-labelledby="loginTitle">
@@ -166,6 +223,88 @@
       </div>
     </dialog>
 
-    <script src="./app.js?v=6"></script>
+    <dialog class="pomodoro-dialog" id="pomodoroDialog" aria-labelledby="pomodoroTitle">
+      <div class="pomodoro-card">
+        <header class="pomodoro-header">
+          <span class="pomodoro-kicker">FOCUS STUDIO</span>
+          <h2 id="pomodoroTitle">番茄钟</h2>
+          <p>把注意力交给当下这一小段时间。</p>
+        </header>
+        <div class="pomodoro-scroll">
+          <div class="pomodoro-modes" role="tablist" aria-label="番茄钟模式">
+          <button type="button" role="tab" data-pomodoro-mode="focus" aria-selected="true">专注时段</button>
+          <button type="button" role="tab" data-pomodoro-mode="short" aria-selected="false">短休息</button>
+          <button type="button" role="tab" data-pomodoro-mode="long" aria-selected="false">长休息</button>
+          </div>
+          <section class="pomodoro-clock" aria-live="off">
+          <svg class="pomodoro-progress" viewBox="0 0 220 220" aria-hidden="true">
+            <circle class="pomodoro-progress-track" cx="110" cy="110" r="94"></circle>
+            <circle class="pomodoro-progress-value" id="pomodoroProgress" cx="110" cy="110" r="94"></circle>
+          </svg>
+          <div class="pomodoro-time-wrap">
+            <span class="pomodoro-current-mode" id="pomodoroModeLabel">专注时段</span>
+            <strong class="pomodoro-time" id="pomodoroTime">25:00</strong>
+            <span class="pomodoro-countup-label" id="pomodoroCountupLabel" hidden>正计时</span>
+            </div>
+          </section>
+          <div class="pomodoro-round"><span>完成轮次</span><strong id="pomodoroRounds">0</strong></div>
+          <section class="pomodoro-subsettings" aria-label="番茄钟子设置">
+            <div class="pomodoro-slider-row">
+              <div class="pomodoro-slider-label"><span>白噪音</span><small id="pomodoroNoiseSummary">关闭</small></div>
+              <div class="pomodoro-slider" data-slider="noise" tabindex="0" aria-label="白噪音选项"><button type="button" data-noise="off" onclick="window.pomodoroSetNoise('off')">关闭</button><button type="button" data-noise="rain" onclick="window.pomodoroSetNoise('rain')">雨声</button><button type="button" data-noise="forest" onclick="window.pomodoroSetNoise('forest')">森林</button><button type="button" data-noise="cafe" onclick="window.pomodoroSetNoise('cafe')">咖啡馆</button><button type="button" data-noise="waves" onclick="window.pomodoroSetNoise('waves')">海浪</button></div>
+            </div>
+            <div class="pomodoro-slider-row">
+              <div class="pomodoro-slider-label"><span>背景色</span><small id="pomodoroThemeSummary">白色</small></div>
+              <div class="pomodoro-slider" data-slider="theme" tabindex="0" aria-label="背景色选项"><button type="button" data-pomodoro-theme="black" onclick="window.pomodoroSetTheme('black')">黑色</button><button type="button" data-pomodoro-theme="white" onclick="window.pomodoroSetTheme('white')">白色</button><button type="button" data-pomodoro-theme="gray" onclick="window.pomodoroSetTheme('gray')">灰色</button></div>
+            </div>
+            <div class="pomodoro-slider-row">
+              <div class="pomodoro-slider-label"><span>数字样式</span><small id="pomodoroDisplaySummary">简洁数字</small></div>
+              <div class="pomodoro-slider" data-slider="display" tabindex="0" aria-label="数字样式选项"><button type="button" data-pomodoro-display="simple" onclick="window.pomodoroSetDisplay('simple')">简洁数字</button><button type="button" data-pomodoro-display="seven-seg" onclick="window.pomodoroSetDisplay('seven-seg')">数码管</button><button type="button" data-pomodoro-display="flip" onclick="window.pomodoroSetDisplay('flip')">翻页数字</button></div>
+            </div>
+            <div class="pomodoro-slider-row">
+              <div class="pomodoro-slider-label"><span>计时方式</span><small id="pomodoroBehaviorSummary">倒计时</small></div>
+              <div class="pomodoro-slider" data-slider="behavior" tabindex="0" aria-label="计时方式选项"><button type="button" data-pomodoro-countup="false" onclick="window.pomodoroSetCountup('false')">倒计时</button><button type="button" data-pomodoro-countup="true" onclick="window.pomodoroSetCountup('true')">正计时</button></div>
+            </div>
+            <label class="pomodoro-inline-setting"><input id="pomodoroAutoAdvance" type="checkbox" checked /> <span>自动进入下一阶段</span><small>阶段结束后自动切换</small></label>
+            <label class="pomodoro-inline-setting"><input id="pomodoroSound" type="checkbox" /> <span>结束提示音</span><small>倒计时结束时提示</small></label>
+          </section>
+          <details class="pomodoro-settings">
+          <summary>时长设置</summary>
+          <div class="pomodoro-duration-grid">
+            <label>专注 <input id="pomodoroFocusMinutes" type="number" min="1" max="180" /></label>
+            <label>短休息 <input id="pomodoroShortMinutes" type="number" min="1" max="60" /></label>
+            <label>长休息 <input id="pomodoroLongMinutes" type="number" min="1" max="120" /></label>
+          </div>
+          </details>
+          <button class="pomodoro-apply" id="pomodoroApply" type="button">确认</button>
+        </div>
+      </div>
+    </dialog>
+
+    <section class="pomodoro-focus-view" id="pomodoroFocusView" hidden aria-label="番茄钟专注页面">
+      <button class="pomodoro-focus-return" id="pomodoroFocusReturn" type="button">返回工具箱</button>
+      <div class="pomodoro-focus-inner">
+        <span class="pomodoro-kicker">FOCUS MODE</span>
+        <h2>专注进行中</h2>
+        <p class="pomodoro-focus-caption">让这一段时间只属于眼前的事情。</p>
+        <section class="pomodoro-focus-clock" aria-live="off">
+          <svg class="pomodoro-progress" viewBox="0 0 220 220" aria-hidden="true">
+            <circle class="pomodoro-progress-track" cx="110" cy="110" r="94"></circle>
+            <circle class="pomodoro-progress-value" id="pomodoroFocusProgress" cx="110" cy="110" r="94"></circle>
+          </svg>
+          <div class="pomodoro-time-wrap">
+            <span class="pomodoro-current-mode" id="pomodoroFocusMode">专注时段</span>
+            <strong class="pomodoro-time" id="pomodoroFocusTime">25:00</strong>
+            <span class="pomodoro-countup-label" id="pomodoroFocusCountup" hidden>正计时</span>
+          </div>
+        </section>
+        <div class="pomodoro-focus-meta"><span>完成轮次</span><strong id="pomodoroFocusRounds">0</strong></div>
+        <button class="pomodoro-focus-pause" id="pomodoroFocusPause" type="button">暂停</button>
+      </div>
+    </section>
+
+    <dialog class="post-detail-dialog" id="postDetailDialog" aria-label="内容详情"></dialog>
+
+    <script src="./app.js?v=87"></script>
   </body>
 </html>
