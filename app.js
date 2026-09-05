@@ -68,6 +68,12 @@ let collapseTimer;
 let lastScrollY = window.scrollY;
 let scrollFrame = 0;
 const topRail = document.querySelector('.top-rail');
+const mobileSearchMedia = window.matchMedia('(max-width: 767px)');
+
+function syncCondensedNavigation() {
+  const condensed = !mobileSearchMedia.matches && Boolean(topRail?.classList.contains('is-scrolled'));
+  canvas?.classList.toggle('is-nav-condensed', condensed);
+}
 
 const avatarIds = {
   林: 'avatar-lin', 周: 'avatar-zhou', 陈: 'avatar-chen', 许: 'avatar-xu',
@@ -228,6 +234,7 @@ function closePageSearch() {
   restorePageSearch();
   pageSearchControls.hidden = true;
   isPinned = false;
+  if (shell.contains(document.activeElement)) document.activeElement.blur();
   setExpanded(false);
 }
 
@@ -303,10 +310,14 @@ window.addEventListener('scroll', () => {
     const shouldRestore = currentY <= 64;
     if (shouldCollapse && !topRail?.classList.contains('is-scrolled')) topRail?.classList.add('is-scrolled');
     else if (shouldRestore && topRail?.classList.contains('is-scrolled')) topRail?.classList.remove('is-scrolled');
+    syncCondensedNavigation();
     lastScrollY = currentY;
     scrollFrame = 0;
   });
 }, { passive: true });
+
+mobileSearchMedia.addEventListener?.('change', syncCondensedNavigation);
+syncCondensedNavigation();
 
 shell.addEventListener('pointerenter', () => {
   window.clearTimeout(collapseTimer);
@@ -314,6 +325,7 @@ shell.addEventListener('pointerenter', () => {
 });
 
 shell.addEventListener('pointerleave', () => {
+  if (mobileSearchMedia.matches) return;
   collapseTimer = window.setTimeout(() => {
     const hasFocus = shell.contains(document.activeElement);
     if (!isPinned && !hasFocus && !photoMenu.classList.contains('is-open')) setExpanded(false);
@@ -391,6 +403,10 @@ document.addEventListener('pointerdown', (event) => {
     loginTrigger.setAttribute('aria-expanded', 'false');
   }
   if (shell.contains(event.target)) return;
+  if (mobileSearchMedia.matches && isPinned) {
+    closePhotoMenu();
+    return;
+  }
   isPinned = false;
   setExpanded(false);
 });

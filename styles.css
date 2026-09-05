@@ -2749,3 +2749,92 @@ html.pomodoro-focus-open { overflow: hidden; }
     pointer-events: none;
   }
 }
+
+/* 桌面滚动折叠：一级栏目进入品牌玻璃内部，将导航下边缘从 138px 收至约 72px。 */
+@media (min-width: 768px) {
+  .canvas .top-rail {
+    transition: top 280ms var(--ease), left 280ms var(--ease), width 280ms var(--ease), height 280ms var(--ease), border-radius 280ms var(--ease), box-shadow 260ms ease, border-color 260ms ease, background 260ms ease;
+  }
+  .canvas .hanging-emblem {
+    transform-origin: top left;
+    transition: top 280ms var(--ease), transform 280ms var(--ease), opacity 220ms ease;
+  }
+  .canvas .verticals-shell {
+    transition: top 300ms var(--ease), width 300ms var(--ease), transform 300ms var(--ease);
+  }
+  .canvas .verticals-track {
+    transition: background 260ms ease, border-color 260ms ease, border-radius 280ms var(--ease), box-shadow 260ms ease, backdrop-filter 260ms ease;
+  }
+  .canvas.is-nav-condensed .top-rail {
+    top: 8px;
+    left: 20px;
+    width: calc(100% - 40px);
+    height: 64px;
+    border-radius: 22px;
+    pointer-events: auto;
+    background: linear-gradient(135deg, rgba(255,255,255,.5), rgba(247,242,255,.25) 48%, rgba(220,239,230,.3)) !important;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .canvas.is-nav-condensed .discovery-layer { z-index: auto; }
+  .canvas.is-nav-condensed .top-rail::before { border-radius: 21px; }
+  .canvas.is-nav-condensed .top-rail::after { inset: 4px; border-radius: 17px; }
+  .canvas.is-nav-condensed .hanging-emblem {
+    top: 10px;
+    opacity: .92;
+    transform: translateX(2px) scale(.72);
+  }
+  .canvas.is-nav-condensed .top-rail .university-mark {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .canvas.is-nav-condensed .top-rail .login-trigger { height: 42px; }
+  .canvas.is-nav-condensed .top-rail .account-menu { top: 52px; }
+  .canvas.is-nav-condensed .verticals-shell {
+    top: 16px;
+    z-index: 31;
+    width: min(720px, calc(100vw - 320px));
+    transform: translateX(-98px);
+  }
+  .canvas.is-nav-condensed .verticals-track {
+    height: 48px;
+    padding-inline: 12px;
+    border-color: transparent;
+    border-radius: 18px;
+    background: linear-gradient(112deg, rgba(255,255,255,.2), rgba(247,242,255,.08) 54%, rgba(220,239,230,.14)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.44);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .canvas.is-nav-condensed .verticals-track::after {
+    inset: 3px;
+    border-color: rgba(255,255,255,.2);
+    opacity: .5;
+  }
+  .canvas.is-nav-condensed .verticals-track button {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 46px;
+    font-size: 20px;
+  }
+}
+
+/* 手机搜索点击后保持展开；失焦和触摸页面内容不会触发形态回缩。 */
+@media (max-width: 767px) {
+  .canvas .search-shell.is-expanded {
+    width: 100% !important;
+    height: 60px;
+  }
+  .canvas .search-shell.is-expanded .search-widget {
+    width: calc(100vw - 24px);
+    height: 60px;
+    border-radius: 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .canvas .top-rail,
+  .canvas .hanging-emblem,
+  .canvas .verticals-shell,
+  .canvas .verticals-track { transition: none !important; }
+}
